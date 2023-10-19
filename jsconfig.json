@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "jsx": "react" // This line includes JSX files
+    },
+    "include": [
+        "src"
+    ]
+}
