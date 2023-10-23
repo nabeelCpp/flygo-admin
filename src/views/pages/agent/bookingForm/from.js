@@ -6,15 +6,17 @@ import RemoveIcon from '@mui/icons-material/Remove'
 import toast from 'react-hot-toast'
 import { airports } from './airports'
 import axios from 'axios'
-import Congratulations from '../../../agentDashboard/Congratulations'
+import Radio from '@mui/material/Radio'
+import RadioGroup from '@mui/material/RadioGroup'
+import FormControlLabel from '@mui/material/FormControlLabel'
 
 const BookingForm = ({ setFlights }) => {
   const today = new Date()
   const defaultDate = today.toISOString().split('T')[0]
   const [formData, setFormData] = useState({
     trip_type: 'oneway', //oneway, round
-    origin: '',
-    destination: '',
+    origin: 'AHB',
+    destination: 'ADB',
     depart_date: defaultDate,
     return_date: defaultDate,
     passengers: {
@@ -24,6 +26,11 @@ const BookingForm = ({ setFlights }) => {
     }
   })
   const [dropdownVisible, setDropdownVisible] = useState(false)
+  const [flightType, setFlightType] = useState('oneway') // Default value
+
+  const handleFlightTypeChange = event => {
+    setFlightType(event.target.value)
+  }
 
   const handleChange = e => {
     const { name, value } = e.target
@@ -75,9 +82,15 @@ const BookingForm = ({ setFlights }) => {
     if (isFormValid(data)) {
       console.log('Form is valid, submitting data:', data)
       toast.success('Form is valid, submitting data')
+      setDropdownVisible(false)
       // call to api.
+      const formData = {
+        ...data,
+        trip_type: flightType
+      }
+
       try {
-        let response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/sabre/flights`, data)
+        let response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/sabre/flights`, formData)
         let responseData = response.data
         toast.success(responseData.message)
         if (responseData.data.groupedItineraryResponse.statistics.itineraryCount === 0) {
@@ -85,6 +98,7 @@ const BookingForm = ({ setFlights }) => {
           toast.error('No flights Found')
         } else {
           setFlights(responseData.data.groupedItineraryResponse)
+          setDropdownVisible(false)
         }
         console.log(responseData.data.groupedItineraryResponse.statistics.itineraryCount)
       } catch (error) {
@@ -93,12 +107,11 @@ const BookingForm = ({ setFlights }) => {
       }
 
       //call api end here
-      toggleDropdown()
     } else {
       console.log('Form is not valid. Please fill in all required fields.')
       toast.error('Form is not valid. Please fill in all required fields.')
       if (data.origin.trim() !== '' && data.destination.trim() !== '') {
-        toggleDropdown()
+        setDropdownVisible(true)
       }
     }
   }
@@ -108,6 +121,26 @@ const BookingForm = ({ setFlights }) => {
   return (
     <form>
       <Grid container spacing={5}>
+        <Grid item xs={12}>
+          <RadioGroup
+            aria-label='flight-type'
+            name='flight-type'
+            value={flightType}
+            onChange={handleFlightTypeChange}
+            row // Display radio buttons horizontally
+          >
+            <FormControlLabel
+              value='oneway'
+              control={<Radio color='primary' />} // You can change the color
+              label='One Way'
+            />
+            <FormControlLabel
+              value='round'
+              control={<Radio color='primary' />} // You can change the color
+              label='Round Trip'
+            />
+          </RadioGroup>
+        </Grid>
         <Grid sx={{ display: 'flex', gap: 2 }} item xs={6} md={6}>
           <FormControl fullWidth>
             <InputLabel for='from-label'>From</InputLabel>
@@ -152,19 +185,21 @@ const BookingForm = ({ setFlights }) => {
             }}
           />
         </Grid>
-        {/* <Grid item xs={6} md={3}>
-          <TextField
-            name='return_date'
-            label='Return'
-            type='date'
-            fullWidth
-            value={formData.return_date}
-            onChange={handleChange}
-            InputLabelProps={{
-              shrink: true
-            }}
-          />
-        </Grid> */}
+        {flightType === 'round' && (
+          <Grid item xs={6} md={3}>
+            <TextField
+              name='return_date'
+              label='Return'
+              type='date'
+              fullWidth
+              value={formData.return_date}
+              onChange={handleChange}
+              InputLabelProps={{
+                shrink: true
+              }}
+            />
+          </Grid>
+        )}
         <Grid item xs={6} md={4}>
           <Button style={{ marginTop: '10px', width: 200 }} variant='outlined' onClick={toggleDropdown}>
             Select Passengers
