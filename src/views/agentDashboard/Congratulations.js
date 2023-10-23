@@ -86,7 +86,7 @@ const AnalyticsCongratulations = ({ flight }) => {
                   {total_time}
                 </Typography>
                 <br />
-                <Typography variant='p'>
+                <Typography variant='p' sx={{ paddingX: '10px' }}>
                   <img
                     src='https://icon2.cleanpng.com/20180423/phe/kisspng-airplane-aircraft-icon-a5-computer-icons-clip-art-take-5adea9052056d3.3476649315245417011325.jpg'
                     style={{ width: '20px', height: '20px' }}
