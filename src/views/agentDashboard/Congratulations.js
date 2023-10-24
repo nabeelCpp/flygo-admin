@@ -5,15 +5,12 @@ import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import { airports } from '../pages/agent/bookingForm/airports'
+import { airlines } from '../pages/agent/bookingForm/airlines'
 
-const AnalyticsCongratulations = ({ flight, handleClickOpen }) => {
+
+const AnalyticsCongratulations = ({ flight, handleClickOpen, convertGmtTimeToBasic }) => {
   const { destination, origin, total_time, flight_stops, flightSchedules, basePrice } = flight
-  const convertGmtTimeToBasic = time => {
-    let a = time.split('+')[0]
-    let b = a.split(':')
-    b.pop()
-    return b.join(':')
-  }
+
 
   return (
     <>
@@ -26,6 +23,14 @@ const AnalyticsCongratulations = ({ flight, handleClickOpen }) => {
                 <ul style={{ marginTop: 10 }}>
                   {flightSchedules.map(sch => (
                     <li style={{ fontSize: '14px' }}>
+                      { airlines.map( a => a.id === sch.carrier.marketing && <img src={a.logo} style={{width: '40px', height: '40px'}} /> ) }
+                      {sch.carrier.marketing + ' ' + sch.carrier.marketingFlightNumber}{' '}
+                    </li>
+                  ))}
+                </ul>
+                {/* <ul style={{ marginTop: 10 }}>
+                  {flightSchedules.map(sch => (
+                    <li style={{ fontSize: '14px' }}>
                       {sch.carrier.marketing + ' ' + sch.carrier.marketingFlightNumber}{' '}
                       <b>
                         [{airports.filter(ap => ap.VENDOR_CODE === sch.departure.airport)[0].CITY_NAME} (
@@ -35,10 +40,10 @@ const AnalyticsCongratulations = ({ flight, handleClickOpen }) => {
                       </b>
                     </li>
                   ))}
-                </ul>
+                </ul> */}
               </Typography>
               <br />
-              <Button variant='outlined' color='primary' onClick={handleClickOpen}>
+              <Button variant='outlined' color='primary' onClick={e => handleClickOpen(flight)}>
                 Flight Details
               </Button>
             </Grid>

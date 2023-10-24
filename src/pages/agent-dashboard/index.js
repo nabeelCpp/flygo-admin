@@ -21,12 +21,23 @@ const convertMinutesToHoursAndMinutes = minutes => {
   }
 }
 
+const convertGmtTimeToBasic = time => {
+  let a = time.split('+')[0]
+  let b = a.split(':')
+  b.pop()
+  return b.join(':')
+}
+
 const AgentDashboard = () => {
   const auth = useAuth()
   const [flights, setFlights] = useState(null)
   const [open, setOpen] = useState(false)
+  // added by nabeel to capture flight details.
+  const [flight, setFlight] = useState(null)
 
-  const handleClickOpen = () => {
+  const handleClickOpen = (details = null) => {
+    setFlight(details)
+    console.log(details)
     setOpen(true)
   }
   const handleClose = () => {
@@ -34,7 +45,7 @@ const AgentDashboard = () => {
   }
 
   return (
-    <di>
+    <div>
       <Grid container spacing={6}>
         <Grid item xs={12} md={12}>
           <Card sx={{ p: 5 }}>
@@ -48,6 +59,7 @@ const AgentDashboard = () => {
                 let legDescriptions = flights.itineraryGroups[0].groupDescription.legDescriptions
                 let destination = airports.filter(a => a.VENDOR_CODE === legDescriptions[0].arrivalLocation)
                 let origin = airports.filter(a => a.VENDOR_CODE === legDescriptions[0].departureLocation)
+                let depart_date =legDescriptions[0].departureDate
                 let legs = itinerary.legs
                 let basePrice = `${itinerary.pricingInformation[0].fare.totalFare.baseFareCurrency} ${itinerary.pricingInformation[0].fare.totalFare.baseFareAmount}`
                 let flight_stops,
@@ -57,7 +69,6 @@ const AgentDashboard = () => {
                 legs.forEach(leg => {
                   let legRef = leg.ref
                   let legDescs = flights.legDescs.filter(l => l.id === legRef)
-                  console.log(legDescs)
                   let schedules = legDescs[0].schedules
                   schedules.forEach(sc => {
                     flights.scheduleDescs.filter(sD => {
@@ -78,19 +89,20 @@ const AgentDashboard = () => {
                   origin,
                   total_time: convertMinutesToHoursAndMinutes(totalMinutes),
                   flight_stops,
-                  flightSchedules
+                  flightSchedules,
+                  depart_date
                 }
                 return (
                   <Grid item xs={12} md={12}>
-                    <Congratulations flight={data} handleClickOpen={handleClickOpen} />
+                    <Congratulations flight={data} handleClickOpen={handleClickOpen} convertGmtTimeToBasic={convertGmtTimeToBasic} />
                   </Grid>
                 )
               })}
           </Card>
         </Grid>
       </Grid>
-      <FlightDetail open={open} handleClose={handleClose} />
-    </di>
+      <FlightDetail open={open} handleClose={handleClose} flight={flight} convertMinutesToHoursAndMinutes={convertMinutesToHoursAndMinutes} convertGmtTimeToBasic={convertGmtTimeToBasic} />
+    </div>
   )
 }
 
